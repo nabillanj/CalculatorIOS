@@ -8,12 +8,37 @@
 
 import UIKit
 
+enum TipPercent: Double {
+    case fifteen = 0.15
+    case eighteen = 0.18
+    case twenty = 0.20
+}
+
 class ViewController: UIViewController {
 
-    @IBOutlet weak var tfBillAmount: BaseTextField!
+    @IBOutlet weak var tfBillAmount: UITextField!
     @IBOutlet weak var tipSegmentedControl: UISegmentedControl!
-    @IBOutlet weak var lblTipAmount: PriceLabel!
-    @IBOutlet weak var lblTotal: PriceLabel!
+    @IBOutlet weak var viewBillAmount: BaseView!
+    @IBOutlet weak var viewTipAmount: BorderView!
+    @IBOutlet weak var viewResetButton: BaseView!
+    @IBOutlet weak var viewParent: PlainView!
+    @IBOutlet weak var lblTipAmount: UILabel!
+    @IBOutlet weak var lblTotal: UILabel!
+    @IBOutlet weak var lblTipPercent: UILabel!
+    @IBOutlet weak var lblBillAmount: UILabel!
+    @IBOutlet weak var lblTiltleTipAmount: UILabel!
+    @IBOutlet weak var lblTitleTotal: UILabel!
+    @IBOutlet weak var btnReset: UIButton!
+    
+    private var tipAmount: Double = 0.0
+    private var tipPercent: TipPercent = .fifteen {
+        didSet {
+            guard let billAmount = Double(tfBillAmount.text!) else { return }
+            let tip = tipPercent.rawValue * billAmount
+            lblTipAmount.text = "\(tip)"
+            lblTotal.text = "\(billAmount - tip)"
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,9 +48,11 @@ class ViewController: UIViewController {
     }
     
     fileprivate func setupView() {
+        tipPercent = .fifteen
         tfBillAmount.becomeFirstResponder()
-        tfBillAmount.addDoneReturnButton(selector: #selector(tfBillAmount.resignFirstResponder))
+        tfBillAmount.addDoneReturnButton(selector: #selector(onReturnField(_:)), withTarget: self)
         tipSegmentedControl.selectedSegmentIndex = 0
+        setupUI()
     }
     
     func addNavigationBar() {
@@ -34,8 +61,8 @@ class ViewController: UIViewController {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: navigationBar.width, height: navigationBar.height))
         let titleLabel = UILabel(frame: CGRect(x: 0, y: navigationBar.height / 2 - 8, width: 200, height: 20))
         titleLabel.text = "Tip Calculator"
-        titleLabel.textColor = UIColor.lightLabel
-        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+        titleLabel.textColor = UIColor.white
+        titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
         view.addSubview(titleLabel)
 
         let switchControl = UISwitch(frame: CGRect(x: navigationBar.width - 66, y: titleLabel.center.y - 16, width: 50, height: 50))
@@ -45,20 +72,52 @@ class ViewController: UIViewController {
         let buttonItem = UIBarButtonItem(customView: view)
         navigationItem.rightBarButtonItem = buttonItem
         self.navigationController?.navigationBar.isTranslucent = false
-        self.navigationController?.navigationBar.barTintColor = UIColor.borderViewColor
     }
 
     // MARK: - Actions
-    @objc func onSwicthThemeMode(switchControl: UISwitch) {
+    fileprivate func setupUI() {
+        tipSegmentedControl.tintColor = Theme.current.borderColor
+        viewBillAmount.backgroundColor = Theme.current.accentBackgroundColor
+        viewResetButton.tintColor = Theme.current.accentBackgroundColor
+        btnReset.backgroundColor = Theme.current.accentBackgroundColor
+        viewParent.backgroundColor = Theme.current.mainBackgroundColor
+        viewTipAmount.backgroundColor = Theme.current.mainBackgroundColor
+        viewTipAmount.layer.borderColor = Theme.current.borderColor.cgColor
         
+        lblBillAmount.textColor = Theme.current.accentTextColor
+        lblTipPercent.textColor = Theme.current.accentTextColor
+        lblTipAmount.textColor = Theme.current.mainTextColor
+        lblTitleTotal.textColor = Theme.current.mainTextColor
+        lblTiltleTipAmount.textColor = Theme.current.mainTextColor
+        lblTotal.textColor = Theme.current.mainTextColor
+
+        navigationController?.navigationBar.barTintColor =  Theme.current.accentBackgroundColor
+    }
+    
+    @objc func onSwicthThemeMode(switchControl: UISwitch) {
+        if switchControl.isOn {
+            Theme.current = DarkTheme()
+        } else {
+            Theme.current = LightTheme()
+        }
+        setupUI()
     }
 
     @IBAction func onReturnField(_ sender: Any) {
         tfBillAmount.resignFirstResponder()
     }
     
-    @IBAction func onClickSegmentedControl(_ sender: Any) {
-        
+    @IBAction func onClickSegmentedControl(_ sender: UISegmentedControl) {
+        switch sender.selectedSegmentIndex {
+        case 0:
+            tipPercent = .fifteen
+        case 1:
+            tipPercent = .eighteen
+        case 2:
+            tipPercent = .twenty
+        default:
+            break
+        }
     }
     
     @IBAction func onReturnResetButton(_ sender: Any) {

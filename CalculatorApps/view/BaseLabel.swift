@@ -21,7 +21,6 @@ class BaseLabel: UILabel {
     }
     
     func setView() {
-        self.textColor = UIColor.whiteLabel
         self.font = UIFont.systemFont(ofSize: 15)
     }
 
@@ -30,7 +29,6 @@ class BaseLabel: UILabel {
 class PriceLabel: BaseLabel {
     
     override func setView() {
-        self.textColor = UIColor.boldLabel
         self.text = "$ \(self.text!)"
         self.font = UIFont.systemFont(ofSize: 15)
     }
@@ -39,7 +37,6 @@ class PriceLabel: BaseLabel {
 class TitleLabel: BaseLabel {
     
     override func setView() {
-        self.textColor = UIColor.lightLabel
         self.font = UIFont.systemFont(ofSize: 15)
     }
 }
